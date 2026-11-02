@@ -17,7 +17,7 @@ const AdminDashboard = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axios.get('https://saylani-full-stack-project.onrender.com/api/products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -37,11 +37,11 @@ const AdminDashboard = () => {
     try {
       if (isEditing) {
         // Send a PUT request to update the specific product
-        await axios.put(`http://localhost:5000/api/products/${editId}`, formData);
+        await axios.put(`https://saylani-full-stack-project.onrender.com/api/products/${editId}`, formData);
         alert('Product updated successfully!');
       } else {
         // Send a POST request to create a new product
-        await axios.post('http://localhost:5000/api/products', formData);
+        await axios.post('https://saylani-full-stack-project.onrender.com/api/products', formData);
         alert('Product added successfully!');
       }
       
@@ -72,7 +72,7 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        await axios.delete(`https://saylani-full-stack-project.onrender.com/api/products/${id}`);
         fetchProducts(); 
       } catch (error) {
         console.error('Error deleting product:', error);
@@ -89,7 +89,7 @@ const AdminDashboard = () => {
 const handleLogout = async () => {
     try {
       // Added empty data {} and explicit withCredentials
-      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+      await axios.post('https://saylani-full-stack-project.onrender.com/api/auth/logout', {}, { withCredentials: true });
       window.location.reload(); // Instantly boots you back to the login screen
     } catch (error) {
       console.error('Error logging out:', error);
