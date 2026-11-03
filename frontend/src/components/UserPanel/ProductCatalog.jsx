@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../config';
 
 const ProductCatalog = () => {
   const [products, setProducts] = useState([]);
@@ -29,7 +30,7 @@ const ProductCatalog = () => {
   };
 
   // 3. Calculate the total price of the cart
-  const cartTotal = cart.reduce((total, item) => total + item.price, 0);
+  const cartTotal = cart.reduce((total, item) => total + Number(item.price || 0), 0);
 
   return (
     <div style={{ display: 'flex', gap: '40px', maxWidth: '1200px', margin: '0 auto' }}>

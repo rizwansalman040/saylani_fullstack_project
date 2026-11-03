@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../config';
 
 const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
@@ -34,14 +35,16 @@ const AdminDashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = { ...formData, price: Number(formData.price) };
     try {
+
       if (isEditing) {
         // Send a PUT request to update the specific product
-        await axios.put(`https://saylani-full-stack-project.onrender.com/api/products/${editId}`, formData);
+        await axios.put(`${API_URL}/api/products/${editId}`, payload);
         alert('Product updated successfully!');
       } else {
         // Send a POST request to create a new product
-        await axios.post('https://saylani-full-stack-project.onrender.com/api/products', formData);
+        await axios.post(`${API_URL}/api/products`, payload);
         alert('Product added successfully!');
       }
       
@@ -52,9 +55,9 @@ const AdminDashboard = () => {
       fetchProducts(); 
     } catch (error) {
       console.error('Error saving product:', error);
+      alert(error.response?.data?.message || 'Could not save the product. Please try again.');
     }
   };
-
   // Triggered when the Admin clicks "Edit" on a product
   const handleEdit = (product) => {
     setFormData({
@@ -72,10 +75,11 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`https://saylani-full-stack-project.onrender.com/api/products/${id}`);
+        await axios.delete(`${API_URL}/api/products/${id}`);
         fetchProducts(); 
       } catch (error) {
-        console.error('Error deleting product:', error);
+       console.error('Error deleting product:', error);
+        alert(error.response?.data?.message || 'Could not delete the product. Please try again.');
       }
     }
   };
@@ -89,11 +93,11 @@ const AdminDashboard = () => {
 const handleLogout = async () => {
     try {
       // Added empty data {} and explicit withCredentials
-      await axios.post('https://saylani-full-stack-project.onrender.com/api/auth/logout', {}, { withCredentials: true });
+      await axios.post(`${API_URL}/api/auth/logout`, {}, { withCredentials: true });
       window.location.reload(); // Instantly boots you back to the login screen
     } catch (error) {
       console.error('Error logging out:', error);
-      alert('Check the console (F12)! The backend might be missing the logout route.');
+      alert('Logout failed. Please try again.');
     }
   };
   return (

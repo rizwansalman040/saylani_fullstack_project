@@ -1,0 +1,2 @@
+// Base URL of the backend API. Override with VITE_API_URL at build time if needed.
+export const API_URL = (import.meta.env.VITE_API_URL || 'https://saylani-full-stack-project.onrender.com').replace(/\/$/, '');

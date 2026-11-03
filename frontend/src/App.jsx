@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from './config';
 import ProductCatalog from './components/UserPanel/ProductCatalog';
 import AdminDashboard from './components/AdminPanel/AdminDashboard';
 import AdminLogin from './components/AdminPanel/AdminLogin';
@@ -14,9 +15,9 @@ const ProtectedAdminRoute = () => {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        await axios.get('https://saylani-full-stack-project.onrender.com/api/auth/verify');
+        await axios.get(`${API_URL}/api/auth/verify`);
         setIsAuthenticated(true);
-      } catch (error) {
+      } catch {
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
