@@ -8,8 +8,6 @@ const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
 const { seedAdmin } = require('./controllers/authController');
 
-connectDB();
-
 const app = express();
 
 app.use(express.json());
@@ -24,14 +22,24 @@ app.use(cors({
     credentials: true
 }));
 
-seedAdmin();
-
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
-
-const PORT = process.env.PORT || 5000;
 
 app.get('/', (req, res) => {
     res.send('Saylani Fullstack API is live and running!');
 });
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+const PORT = process.env.PORT || 5000;
+
+// The Fix: Force Node.js to wait for the database connection BEFORE seeding
+const startServer = async () => {
+    try {
+        await connectDB();
+        await seedAdmin();
+        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    } catch (error) {
+        console.error('Failed to connect to the database or start server:', error);
+    }
+};
+
+startServer();
