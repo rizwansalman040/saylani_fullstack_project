@@ -2,9 +2,9 @@ const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+// Auto-create the admin in the database using secure Environment Variables
 const seedAdmin = async () => {
     try {
-        // The Fix: Use Render environment variables instead of hardcoded text
         const username = process.env.ADMIN_USERNAME || 'admin';
         const password = process.env.ADMIN_PASSWORD || 'admin@123';
 
@@ -33,6 +33,7 @@ const loginAdmin = async (req, res) => {
 
         const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
+        // Set HTTP-Only Cookie
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', 
@@ -51,7 +52,7 @@ const verifyAdmin = (req, res) => {
 };
 
 const logoutAdmin = (req, res) => {
-    // The Fix: Match the exact security rules to successfully clear the cookie
+    // CRITICAL: Cookies must be cleared with the exact same security options used to set them
     res.clearCookie('token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
