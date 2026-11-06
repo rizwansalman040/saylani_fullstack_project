@@ -16,7 +16,8 @@ const AdminLogin = ({ onLoginSuccess }) => {
     setError('');
     setIsSubmitting(true);
     try {
-      await axios.post(`${API_URL}/api/auth/login`, credentials);
+      // THE FIX: Added { withCredentials: true } to accept the cross-site cookie
+      await axios.post(`${API_URL}/api/auth/login`, credentials, { withCredentials: true });
       onLoginSuccess();
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
