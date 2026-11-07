@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../../config';
 
-const AdminDashboard = () => {
+// 1. Accept the onLogout prop here
+const AdminDashboard = ({ onLogout }) => {
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
@@ -12,13 +13,13 @@ const AdminDashboard = () => {
     imageUrl: ''
   });
   
-  // New state variables to track if we are editing an existing product
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('https://saylani-full-stack-project.onrender.com/api/products');
+      // 2. Use the dynamic API_URL instead of the hardcoded link
+      const response = await axios.get(`${API_URL}/api/products`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -37,18 +38,14 @@ const AdminDashboard = () => {
     e.preventDefault();
     const payload = { ...formData, price: Number(formData.price) };
     try {
-
       if (isEditing) {
-        // Send a PUT request to update the specific product
         await axios.put(`${API_URL}/api/products/${editId}`, payload);
         alert('Product updated successfully!');
       } else {
-        // Send a POST request to create a new product
         await axios.post(`${API_URL}/api/products`, payload);
         alert('Product added successfully!');
       }
       
-      // Reset the form and editing state
       setFormData({ name: '', price: '', description: '', category: '', imageUrl: '' });
       setIsEditing(false);
       setEditId(null);
@@ -58,7 +55,7 @@ const AdminDashboard = () => {
       alert(error.response?.data?.message || 'Could not save the product. Please try again.');
     }
   };
-  // Triggered when the Admin clicks "Edit" on a product
+
   const handleEdit = (product) => {
     setFormData({
       name: product.name,
@@ -69,7 +66,7 @@ const AdminDashboard = () => {
     });
     setIsEditing(true);
     setEditId(product._id);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll back to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
   };
 
   const handleDelete = async (id) => {
@@ -84,22 +81,23 @@ const AdminDashboard = () => {
     }
   };
 
-  // Cancel edit mode
   const handleCancelEdit = () => {
     setFormData({ name: '', price: '', description: '', category: '', imageUrl: '' });
     setIsEditing(false);
     setEditId(null);
   };
-const handleLogout = async () => {
+
+  const handleLogout = async () => {
     try {
-      // Added empty data {} and explicit withCredentials
       await axios.post(`${API_URL}/api/auth/logout`, {}, { withCredentials: true });
-      window.location.reload(); // Instantly boots you back to the login screen
+      // 3. Trigger the parent state change instead of reloading the window
+      if (onLogout) onLogout(); 
     } catch (error) {
       console.error('Error logging out:', error);
       alert('Logout failed. Please try again.');
     }
   };
+  
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

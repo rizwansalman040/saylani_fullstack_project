@@ -6,6 +6,7 @@ import ProductCatalog from './components/UserPanel/ProductCatalog';
 import AdminDashboard from './components/AdminPanel/AdminDashboard';
 import AdminLogin from './components/AdminPanel/AdminLogin';
 
+// Automatically applies { withCredentials: true } to all axios requests globally
 axios.defaults.withCredentials = true;
 
 const ProtectedAdminRoute = () => {
@@ -28,7 +29,13 @@ const ProtectedAdminRoute = () => {
 
   if (isLoading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Verifying secure connection...</p>;
 
-  return isAuthenticated ? <AdminDashboard /> : <AdminLogin onLoginSuccess={() => setIsAuthenticated(true)} />;
+  // THE FIX: Added onLogout={() => setIsAuthenticated(false)} 
+  // Now, when you click Logout inside AdminDashboard, it instantly flips this back to the AdminLogin screen.
+  return isAuthenticated ? (
+    <AdminDashboard onLogout={() => setIsAuthenticated(false)} />
+  ) : (
+    <AdminLogin onLoginSuccess={() => setIsAuthenticated(true)} />
+  );
 };
 
 function App() {
