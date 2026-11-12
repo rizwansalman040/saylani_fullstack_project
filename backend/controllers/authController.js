@@ -2,7 +2,6 @@ const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Auto-create the admin in the database using secure Environment Variables
 const seedAdmin = async () => {
     try {
         const username = process.env.ADMIN_USERNAME || 'admin';
@@ -48,11 +47,20 @@ const loginAdmin = async (req, res) => {
 };
 
 const verifyAdmin = (req, res) => {
-    res.status(200).json({ message: 'Authenticated' });
+    const token = req.cookies?.token;
+    
+    if (!token) {
+        return res.status(401).json({ message: 'Not authenticated' });
+    }
+    try {
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
+        res.status(200).json({ message: 'Authenticated' });
+    } catch (error) {
+        res.status(401).json({ message: 'Invalid token' });
+    }
 };
 
 const logoutAdmin = (req, res) => {
-    // CRITICAL: Cookies must be cleared with the exact same security options used to set them
     res.clearCookie('token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
