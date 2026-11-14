@@ -6,7 +6,7 @@ const connectDB = require('./db');
 
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/ur'); 
+const userRoutes = require('./routes/userRoutes'); 
 const { seedAdmin } = require('./controllers/authController');
 const app = express();
 

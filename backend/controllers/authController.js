@@ -1,72 +1,52 @@
-const User = require('../models/User');
+const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Register a new customer
-const registerUser = async (req, res) => {
-    const { username, password } = req.body;
-    
+const seedAdmin = async () => {
     try {
-        const existingUser = await User.findOne({ username });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Username already taken' });
+        const username = process.env.ADMIN_USERNAME || 'admin';
+        const password = process.env.ADMIN_PASSWORD || 'admin@123';
+
+        const adminExists = await Admin.findOne({ username });
+        if (!adminExists) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            await Admin.create({ username, password: hashedPassword });
+            console.log('Admin account securely seeded in database.');
+        } else {
+            console.log('Admin account already exists in database.');
         }
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newUser = await User.create({ 
-            username, 
-            password: hashedPassword 
-        });
-
-        // The newUser._id is the hidden ID your teacher mentioned
-        res.status(201).json({ message: 'Account created successfully', userId: newUser._id });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Error seeding admin:', error);
     }
 };
 
-// Login for customers
-const loginUser = async (req, res) => {
+const loginAdmin = async (req, res) => {
     const { username, password } = req.body;
-
     try {
-        const user = await User.findOne({ username });
-        if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+        const admin = await Admin.findOne({ username });
+        if (!admin) return res.status(401).json({ message: 'Invalid credentials' });
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, admin.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        res.cookie('userToken', token, {
+        res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production', 
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-            maxAge: 86400000 // 24 hours
+            maxAge: 3600000 
         });
 
-        res.status(200).json({ message: 'Logged in successfully', username: user.username });
+        res.status(200).json({ message: 'Logged in successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// Logout the customer
-const logoutUser = (req, res) => {
-    res.clearCookie('userToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-    });
-    res.status(200).json({ message: 'Logged out successfully' });
-};
-
-// Check if a customer has a valid login session
-const verifyUser = (req, res) => {
-    // Notice it looks for 'userToken' instead of 'token' to keep admins and users separate
-    const token = req.cookies?.userToken;
+const verifyAdmin = (req, res) => {
+    const token = req.cookies?.token;
     
     if (!token) {
         return res.status(401).json({ message: 'Not authenticated' });
@@ -80,4 +60,14 @@ const verifyUser = (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, logoutUser, verifyUser };
+const logoutAdmin = (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    });
+    res.status(200).json({ message: 'Logged out' });
+};
+
+// THIS LINE IS CRITICAL - It shares the functions with authRoutes
+module.exports = { seedAdmin, loginAdmin, verifyAdmin, logoutAdmin };
