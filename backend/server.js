@@ -6,9 +6,8 @@ const connectDB = require('./db');
 
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes'); // ADDED: Import the new user routes
+const userRoutes = require('./routes/ur'); 
 const { seedAdmin } = require('./controllers/authController');
-
 const app = express();
 
 app.use(express.json());

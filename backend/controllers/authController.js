@@ -53,6 +53,7 @@ const loginUser = async (req, res) => {
     }
 };
 
+// Logout the customer
 const logoutUser = (req, res) => {
     res.clearCookie('userToken', {
         httpOnly: true,
@@ -62,4 +63,21 @@ const logoutUser = (req, res) => {
     res.status(200).json({ message: 'Logged out successfully' });
 };
 
-module.exports = { registerUser, loginUser, logoutUser };
+// Check if a customer has a valid login session
+const verifyUser = (req, res) => {
+    // Notice it looks for 'userToken' instead of 'token' to keep admins and users separate
+    const token = req.cookies?.userToken;
+    
+    if (!token) {
+        return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+        res.status(200).json({ message: 'Authenticated' });
+    } catch (error) {
+        res.status(401).json({ message: 'Invalid token' });
+    }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, verifyUser };
