@@ -1,27 +1,19 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    googleId: {
+    username: {
         type: String,
         required: true,
         unique: true
     },
-    name: {
+    password: {
         type: String,
         required: true
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    avatar: {
-        type: String
-    },
     role: {
         type: String,
-        enum: ['user', 'admin'],
-        default: 'user' // Everyone defaults to normal user
+        enum: ['customer', 'admin'],
+        default: 'customer' // Normal users default to customer
     }
 }, {
     timestamps: true

@@ -6,6 +6,7 @@ const connectDB = require('./db');
 
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes'); // ADDED: Import the new user routes
 const { seedAdmin } = require('./controllers/authController');
 
 const app = express();
@@ -24,6 +25,7 @@ app.use(cors({
 
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes); // ADDED: Activate the /api/users endpoints
 
 app.get('/', (req, res) => {
     res.send('Saylani Fullstack API is live and running!');
