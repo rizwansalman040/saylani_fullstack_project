@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import { API_URL } from './config';
+
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+
+// Import your pages
 import ProductCatalog from './components/UserPanel/ProductCatalog';
 import AdminDashboard from './components/AdminPanel/AdminDashboard';
 import AdminLogin from './components/AdminPanel/AdminLogin';
@@ -40,18 +45,9 @@ const ProtectedAdminRoute = () => {
 function App() {
   return (
     <Router>
-      <nav style={{ padding: '20px', background: '#333', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>Store Catalog</Link>
-          <Link to="/admin" style={{ color: 'white', textDecoration: 'none' }}>Admin Panel</Link>
-        </div>
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <Link to="/login" style={{ color: '#007bff', textDecoration: 'none', background: 'white', padding: '5px 10px', borderRadius: '4px' }}>Login</Link>
-          <Link to="/register" style={{ color: '#28a745', textDecoration: 'none', background: 'white', padding: '5px 10px', borderRadius: '4px' }}>Register</Link>
-        </div>
-      </nav>
+      <Navbar />
 
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: '20px', minHeight: '80vh' }}>
         <Routes>
           <Route path="/" element={<ProductCatalog />} />
           <Route path="/admin" element={<ProtectedAdminRoute />} />
@@ -59,6 +55,8 @@ function App() {
           <Route path="/register" element={<UserRegister />} />
         </Routes>
       </div>
+
+      <Footer />
     </Router>
   );
 }

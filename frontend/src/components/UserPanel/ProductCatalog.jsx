@@ -1,10 +1,11 @@
+import CategoryGrid from './CategoryGrid';
+import PromoBlock from './PromoBlock';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_URL } from '../../config';
+import Hero from './Hero';
 
 const ProductCatalog = () => {
   const [products, setProducts] = useState([]);
-  // 1. We add a new state to hold the cart items
   const [cart, setCart] = useState([]);
 
   // Fetch products from the live database
@@ -20,7 +21,7 @@ const ProductCatalog = () => {
     fetchProducts();
   }, []);
 
-  // 2. Cart Functions to Add and Remove items
+  // Cart Functions to Add and Remove items
   const addToCart = (product) => {
     setCart([...cart, product]);
   };
@@ -29,70 +30,110 @@ const ProductCatalog = () => {
     setCart(cart.filter((_, index) => index !== indexToRemove));
   };
 
-  // 3. Calculate the total price of the cart
+  // Calculate the total price of the cart
   const cartTotal = cart.reduce((total, item) => total + Number(item.price || 0), 0);
 
   return (
-    <div style={{ display: 'flex', gap: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-      
-      {/* Main Storefront Area */}
-      <div style={{ flex: '2' }}>
-        <h2>Live Storefront</h2>
-        {products.length === 0 ? (
-          <p>No products available yet. Add some from the Admin Panel!</p>
-        ) : (
-          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-            {products.map((product) => (
-              <div key={product._id} style={{ border: '1px solid #ddd', padding: '15px', width: '250px', borderRadius: '8px', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ width: '100%', height: '150px', backgroundColor: '#eee', marginBottom: '10px', backgroundImage: `url(${product.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '4px' }}></div>
-                <h3 style={{ margin: '0 0 10px 0' }}>{product.name}</h3>
-                <p style={{ margin: '0 0 5px 0', fontWeight: 'bold', color: '#28a745' }}>${product.price}</p>
-                <span style={{ fontSize: '12px', background: '#007bff', color: 'white', padding: '3px 8px', borderRadius: '12px', alignSelf: 'flex-start' }}>{product.category}</span>
-                <p style={{ fontSize: '14px', color: '#555', marginTop: '10px', flexGrow: 1 }}>{product.description}</p>
-                
-                {/* 4. We trigger the addToCart function when this button is clicked */}
-                <button onClick={() => addToCart(product)} style={{ width: '100%', padding: '10px', marginTop: '15px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                  Add to Cart
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+    <>
+      {/* 1. The Hero Banner automatically sits at the very top */}
+      <Hero />
 
-      {/* 5. The new Shopping Cart Sidebar */}
-      <div style={{ flex: '1', borderLeft: '2px solid #eee', paddingLeft: '30px' }}>
-        <h2>Your Cart</h2>
-        {cart.length === 0 ? (
-          <p style={{ color: '#777' }}>Your cart is empty.</p>
-        ) : (
-          <div>
-            {cart.map((item, index) => (
-              <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <strong>{item.name}</strong>
-                  <span style={{ color: '#555', fontSize: '14px' }}>${item.price}</span>
-                </div>
-                <button onClick={() => removeFromCart(index)} style={{ background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '5px 10px', cursor: 'pointer' }}>
-                  X
-                </button>
+      {/* 2. The 4 Image Cards */}
+      <CategoryGrid />
+
+      {/* 3. The main Shop Section with NOVA styling */}
+      <section className="section shop-section" id="shop">
+        <div className="page-width" style={{ display: 'flex', gap: '40px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          
+          {/* Left Side: Product Grid */}
+          <div style={{ flex: '1 1 70%' }}>
+            <div className="section-heading shop-heading">
+              <div>
+                <span className="eyebrow">A FEW GOOD FINDS</span>
+                <h2>Live Storefront<span className="brand-dot">.</span></h2>
               </div>
-            ))}
-            
-            <div style={{ marginTop: '20px', borderTop: '2px solid #333', paddingTop: '15px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 'bold' }}>
-                <span>Total:</span>
-                <span>${cartTotal.toFixed(2)}</span>
-              </div>
-              <button onClick={() => alert('Order Placed Successfully!')} style={{ width: '100%', padding: '15px', marginTop: '20px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>
-                Simulate Checkout
-              </button>
             </div>
-          </div>
-        )}
-      </div>
 
-    </div>
+            {products.length === 0 ? (
+              <div className="empty-state">
+                <span>⌕</span>
+                <h3>No products available yet</h3>
+                <p>Add some from the Admin Panel to see them here.</p>
+              </div>
+            ) : (
+              <div className="product-grid">
+                {products.map((product) => (
+                  <article key={product._id} className="product-card">
+                    <div className="product-image-wrap">
+                      <img src={product.imageUrl} alt={product.name} />
+                      
+                      <button 
+                        className="quick-btn" 
+                        onClick={() => addToCart(product)}
+                      >
+                        Add to bag ↗
+                      </button>
+                    </div>
+                    
+                    <div className="product-meta">
+                      <span className="product-category">{product.category}</span>
+                      <h3 className="product-title">{product.name}</h3>
+                      <div className="product-bottom">
+                        <span className="price">${product.price}</span>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right Side: The Shopping Cart Sidebar */}
+          <div style={{ flex: '1 1 25%', background: '#fff', padding: '25px', borderRadius: '18px', boxShadow: '0 10px 35px #00000012', position: 'sticky', top: '100px' }}>
+            <span className="eyebrow">YOUR BAG</span>
+            <h3 style={{ margin: '10px 0 20px', fontFamily: 'var(--display)', fontSize: '22px' }}>Shopping cart</h3>
+            
+            {cart.length === 0 ? (
+              <p style={{ color: 'var(--muted)', fontSize: '12px' }}>Your bag is taking a break. Add something lovely.</p>
+            ) : (
+              <div className="cart-items">
+                {cart.map((item, index) => (
+                  <div key={index} className="cart-line" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
+                    <div>
+                      <h4 style={{ fontSize: '12px', margin: '0 0 4px' }}>{item.name}</h4>
+                      <small style={{ color: 'var(--muted)' }}>${item.price}</small>
+                    </div>
+                    <button 
+                      onClick={() => removeFromCart(index)} 
+                      className="remove-item"
+                      style={{ color: '#dc3545', fontSize: '24px', lineHeight: '1' }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                
+                <div className="cart-bottom" style={{ marginTop: '20px' }}>
+                  <div className="subtotal-row">
+                    <span>Subtotal</span>
+                    <strong>${cartTotal.toFixed(2)}</strong>
+                  </div>
+                  <button 
+                    className="btn btn-dark checkout-btn" 
+                    onClick={() => alert('Order Placed Successfully!')}
+                  >
+                    Checkout <span>→</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Bottom Promo & Newsletter */}
+      <PromoBlock />
+    </>
   );
 };
 
