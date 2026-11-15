@@ -7,6 +7,7 @@ const connectDB = require('./db');
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes'); 
+const orderRoutes = require('./routes/orderRoutes'); // ADDED: Import order routes
 const { seedAdmin } = require('./controllers/authController');
 const app = express();
 
@@ -17,7 +18,7 @@ app.use(cookieParser());
 app.use(cors({
     origin: [
         'http://localhost:5173',
-        'https://saylani-fullstack-project.netlify.app'
+        'https://netlify.app'
     ],
     credentials: true
 }));
@@ -25,6 +26,7 @@ app.use(cors({
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes); // ADDED: Activate the /api/users endpoints
+app.use('/api/orders', orderRoutes); // ADDED: Activate the /api/orders endpoints
 
 app.get('/', (req, res) => {
     res.send('Saylani Fullstack API is live and running!');

@@ -1,8 +1,9 @@
-import CategoryGrid from './CategoryGrid';
-import PromoBlock from './PromoBlock';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../config'; // <-- Added missing import
 import Hero from './Hero';
+import CategoryGrid from './CategoryGrid';
+import PromoBlock from './PromoBlock';
 
 const ProductCatalog = () => {
   const [products, setProducts] = useState([]);
@@ -12,7 +13,7 @@ const ProductCatalog = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://saylani-full-stack-project.onrender.com/api/products');
+        const response = await axios.get(`${API_URL}/api/products`);
         setProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -44,7 +45,7 @@ const ProductCatalog = () => {
       {/* 3. The main Shop Section with NOVA styling */}
       <section className="section shop-section" id="shop">
         <div className="page-width" style={{ display: 'flex', gap: '40px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          
+
           {/* Left Side: Product Grid */}
           <div style={{ flex: '1 1 70%' }}>
             <div className="section-heading shop-heading">
@@ -66,7 +67,7 @@ const ProductCatalog = () => {
                   <article key={product._id} className="product-card">
                     <div className="product-image-wrap">
                       <img src={product.imageUrl} alt={product.name} />
-                      
+
                       <button 
                         className="quick-btn" 
                         onClick={() => addToCart(product)}
@@ -74,12 +75,12 @@ const ProductCatalog = () => {
                         Add to bag ↗
                       </button>
                     </div>
-                    
+
                     <div className="product-meta">
                       <span className="product-category">{product.category}</span>
                       <h3 className="product-title">{product.name}</h3>
                       <div className="product-bottom">
-                        <span className="price">${product.price}</span>
+                        <span className="price">Rs. {product.price}</span>
                       </div>
                     </div>
                   </article>
@@ -92,7 +93,7 @@ const ProductCatalog = () => {
           <div style={{ flex: '1 1 25%', background: '#fff', padding: '25px', borderRadius: '18px', boxShadow: '0 10px 35px #00000012', position: 'sticky', top: '100px' }}>
             <span className="eyebrow">YOUR BAG</span>
             <h3 style={{ margin: '10px 0 20px', fontFamily: 'var(--display)', fontSize: '22px' }}>Shopping cart</h3>
-            
+
             {cart.length === 0 ? (
               <p style={{ color: 'var(--muted)', fontSize: '12px' }}>Your bag is taking a break. Add something lovely.</p>
             ) : (
@@ -101,7 +102,7 @@ const ProductCatalog = () => {
                   <div key={index} className="cart-line" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
                     <div>
                       <h4 style={{ fontSize: '12px', margin: '0 0 4px' }}>{item.name}</h4>
-                      <small style={{ color: 'var(--muted)' }}>${item.price}</small>
+                      <small style={{ color: 'var(--muted)' }}>Rs. {item.price}</small>
                     </div>
                     <button 
                       onClick={() => removeFromCart(index)} 
@@ -112,15 +113,37 @@ const ProductCatalog = () => {
                     </button>
                   </div>
                 ))}
-                
+
                 <div className="cart-bottom" style={{ marginTop: '20px' }}>
                   <div className="subtotal-row">
                     <span>Subtotal</span>
-                    <strong>${cartTotal.toFixed(2)}</strong>
+                    <strong>Rs. {cartTotal.toFixed(2)}</strong>
                   </div>
                   <button 
                     className="btn btn-dark checkout-btn" 
-                    onClick={() => alert('Order Placed Successfully!')}
+                    onClick={async () => {
+                      try {
+                        // Map the cart to match the backend schema expectation
+                        const orderItems = cart.map(item => ({
+                          name: item.name,
+                          price: item.price,
+                          product: item._id
+                        }));
+
+                        await axios.post(`${API_URL}/api/orders`, {
+                          orderItems,
+                          totalPrice: cartTotal
+                        }, { withCredentials: true });
+
+                        alert('Order Placed Successfully! Check My Orders.');
+                        setCart([]); // Clear the cart after successful order
+                      } catch (error) {
+                        console.error("Checkout Error Status:", error.response?.status);
+                        console.error("Checkout Error Data:", error.response?.data);
+                        console.error("Full Error:", error);
+                        alert(error.response?.data?.message || `Order failed (${error.response?.status || 'network error'})`);
+                      }
+                    }}
                   >
                     Checkout <span>→</span>
                   </button>

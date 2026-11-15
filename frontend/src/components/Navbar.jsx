@@ -1,8 +1,32 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { API_URL } from '../config';
 
 const Navbar = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [username, setUsername] = useState(null);
+  const navigate = useNavigate();
+
+  // Check if user is logged in when the Navbar loads
+  useEffect(() => {
+    const storedUser = localStorage.getItem('nova_user');
+    if (storedUser) {
+      setUsername(storedUser);
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${API_URL}/api/users/logout`, {}, { withCredentials: true });
+      localStorage.removeItem('nova_user');
+      setUsername(null);
+      setIsProfileMenuOpen(false);
+      navigate('/');
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
 
   return (
     <>
@@ -19,17 +43,10 @@ const Navbar = () => {
           <Link className="active" to="/">Home</Link>
           <a href="#shop">Shop</a>
           <a href="#categories">Categories</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
         </nav>
         
         <div className="header-actions">
           <button className="icon-btn search-toggle" aria-label="Open search">⌕</button>
-          
-          <button className="icon-btn" aria-label="Wishlist">
-            ♡ <span className="tiny-count">0</span>
-          </button>
-          
           <button className="icon-btn cart-trigger" aria-label="Shopping cart">
             ♧ <span className="tiny-count">0</span>
           </button>
@@ -37,32 +54,30 @@ const Navbar = () => {
           <div className="profile-wrap">
             <button 
               className="profile-trigger" 
-              aria-label="Profile menu"
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
-              <span className="avatar">G</span>
-              <span className="profile-label">Account</span>⌄
+              {/* Show user's first letter, or 'A' for Account if logged out */}
+              <span className="avatar">{username ? username.charAt(0).toUpperCase() : 'A'}</span>
+              <span className="profile-label">{username ? username : 'Account'}</span>⌄
             </button>
             
-            {/* The dropdown menu toggles based on React state */}
             <div className={`profile-menu ${isProfileMenuOpen ? '' : 'hidden'}`}>
-              <Link to="/profile">My profile</Link>
-              <Link to="/orders">My orders</Link>
-              <Link to="/login">Log in</Link>
-              <Link to="/register">Register</Link>
+              {username ? (
+                <>
+                  <Link to="/profile">My profile</Link>
+                  <Link to="/orders">My orders</Link>
+                  <button onClick={handleLogout} style={{ color: 'red', width: '100%' }}>Logout</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login">Log in</Link>
+                  <Link to="/register">Register</Link>
+                </>
+              )}
             </div>
           </div>
         </div>
       </header>
-
-      {/* Mobile Navigation Bar */}
-      <nav className="mobile-nav" aria-label="Mobile navigation">
-        <Link to="/"><span>⌂</span>Home</Link>
-        <a href="#categories"><span>▦</span>Categories</a>
-        <button><span>⌕</span>Search</button>
-        <button><span>♧<i>0</i></span>Cart</button>
-        <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}><span>◉</span>Profile</button>
-      </nav>
     </>
   );
 };

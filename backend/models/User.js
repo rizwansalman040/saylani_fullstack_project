@@ -13,7 +13,16 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['customer', 'admin'],
-        default: 'customer' // Normal users default to customer
+        default: 'customer'
+    },
+    // New fields for Profile Management
+    profileImage: {
+        type: String,
+        default: ''
+    },
+    description: {
+        type: String,
+        default: ''
     }
 }, {
     timestamps: true

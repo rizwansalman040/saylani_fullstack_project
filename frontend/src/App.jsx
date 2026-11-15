@@ -12,6 +12,7 @@ import AdminDashboard from './components/AdminPanel/AdminDashboard';
 import AdminLogin from './components/AdminPanel/AdminLogin';
 import UserLogin from './components/UserPanel/UserLogin';
 import UserRegister from './components/UserPanel/UserRegister';
+import MyOrders from './components/UserPanel/MyOrders'; // ADDED: Import MyOrders
 
 axios.defaults.withCredentials = true;
 
@@ -53,6 +54,7 @@ function App() {
           <Route path="/admin" element={<ProtectedAdminRoute />} />
           <Route path="/login" element={<UserLogin />} />
           <Route path="/register" element={<UserRegister />} />
+          <Route path="/orders" element={<MyOrders />} /> {/* ADDED: Orders route */}
         </Routes>
       </div>
 

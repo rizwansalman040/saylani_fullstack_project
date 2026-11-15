@@ -2,6 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+// --- EXISTING AUTH LOGIC ---
 const registerUser = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -63,4 +64,53 @@ const verifyUser = (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, logoutUser, verifyUser };
+// --- NEW PROFILE LOGIC ---
+
+// Middleware to verify token and attach user ID to request
+const protectUser = (req, res, next) => {
+    const token = req.cookies?.userToken;
+    if (!token) return res.status(401).json({ message: 'Not authorized, please log in' });
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // Contains the user ID
+        next();
+    } catch (error) {
+        res.status(401).json({ message: 'Session expired, please log in again' });
+    }
+};
+
+// Fetch current user's data
+const getProfile = async (req, res) => {
+    try {
+        // Find user by the ID embedded in their secure cookie, exclude the password
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// Update profile text and image
+const updateProfile = async (req, res) => {
+    try {
+        const { username, description } = req.body;
+        const updateData = {};
+
+        if (username) updateData.username = username;
+        if (description !== undefined) updateData.description = description;
+        
+        // If Multer processed a file, req.file.path contains the live Cloudinary URL
+        if (req.file) {
+            updateData.profileImage = req.file.path;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('-password');
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update profile', error: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, verifyUser, protectUser, getProfile, updateProfile };

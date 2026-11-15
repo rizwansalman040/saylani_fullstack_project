@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { API_URL } from '../../config';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const UserLogin = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -17,8 +16,13 @@ const UserLogin = () => {
     setError('');
     
     try {
-      await axios.post(`${API_URL}/api/users/login`, credentials, { withCredentials: true });
-      navigate('/'); // Send them to the store catalog on success
+      const response = await axios.post(`${API_URL}/api/users/login`, credentials, { withCredentials: true });
+      
+      // SAVE THE USERNAME TO LOCAL STORAGE
+      localStorage.setItem('nova_user', response.data.username);
+      
+      // Force a page reload to update the Navbar
+      window.location.href = '/'; 
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed.');
     }
