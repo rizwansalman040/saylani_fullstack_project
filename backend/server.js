@@ -14,12 +14,21 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// Allow both localhost and your live Netlify domain
+// Render sits behind a proxy; needed so secure cookies work in production
+app.set('trust proxy', 1);
+
+// CORS must match the exact frontend origin (no wildcards, no bare netlify.app)
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://saylani-fullstack-project.netlify.app',
+    process.env.CLIENT_URL // optional: set on Render if the frontend URL changes
+].filter(Boolean).map(o => o.replace(/\/$/, ''));
+
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'https://netlify.app'
-    ],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        return callback(new Error('Not allowed by CORS: ' + origin));
+    },
     credentials: true
 }));
 
